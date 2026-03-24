@@ -1,6 +1,8 @@
 import requests
 import argparse
+import os
 from bs4 import BeautifulSoup, Tag, NavigableString
+from urllib.parse import urljoin, urlparse, urldefrag
 
 class ErrorDeEntrada(Exception):
     def __init__(self, mensaje="Entrada incorrecta"):
@@ -40,11 +42,11 @@ class Spider(BeautifulSoup):
         self.__ruta_de_almacenamiento   = ruta_de_almacenamiento
 
         self.array_de_imagenes          = []
+        self._imagenes_vistas           = set()
+        self._paginas_visitadas         = set()
         self.respuesta                  = None
         self.sopa_de_letras             = None
         self.html                       = None
-        self.array_de_profundidad       = []
-        self.recuento_de_profundidad    = 0
 
         print(f"url: ", self.__url)
         print(f"dominio: ", self.__fulldomain)
@@ -105,42 +107,68 @@ class Spider(BeautifulSoup):
         Hace la petición al servidor de la página deseada.
         Guardando la respuesta y el contenido (body).
         '''
-        if self.__profundidad == profundidad:
+        url_limpia, _ = urldefrag(url) # _ es el contenido frontend que no me interesa, como #section1 o cosas así
+
+        if profundidad > self.__profundidad:
             print("\n\nHemos llegado al limíte de profundidad. \n\n")
             return
-        self.respuesta = requests.get(url)
+
+        if url_limpia in self._paginas_visitadas:
+            return
+
+        self._paginas_visitadas.add(url_limpia)
+
+        try:
+            self.respuesta = requests.get(url_limpia, timeout=15)
+            self.respuesta.raise_for_status()
+        except requests.RequestException as e:
+            print(f"Error al pedir {url_limpia}: {e}")
+            return
+
         print(self.respuesta.ok)
 
+        content_type = self.respuesta.headers.get("Content-Type", "").lower()
+        if "text/html" not in content_type:
+            return
+
         self.sopa_de_letras = self.respuesta._content
-        self.parsea_la_pagina_spider()
+        self.parsea_la_pagina_spider(url_limpia, profundidad)
         
-    def parsea_la_pagina_spider(self):
+    def parsea_la_pagina_spider(self, base_url, profundidad):
         '''
         Esta función la uso para interpretar la respuesta en formato HTML
         Permite encontrar los tags interesantes a través de los objetos de BeautifulSoup
         '''
         self.html = BeautifulSoup(self.sopa_de_letras, 'html.parser')
 
-        self.extrae_imagenes_spider(self.html)
+        self.extrae_imagenes_spider(self.html, base_url, profundidad)
         self.descarga_imagenes()
 
-    def extrae_imagenes_spider(self, html):
+    def extrae_imagenes_spider(self, html, base_url, profundidad):
         '''
         Esta función extrae los tags html que renderizan una imagen.
         '''
         def selecionar_archivo_del_tipo_q_guste(archivo):
-            aceptados = ("jpg", "jpeg", "png", "gif", "bmp")
-            
-            if any(archivo.lower().endswith(ext) for ext in aceptados):
-                return True
-            elif archivo.lower().endswith("html") and self.__recursividad:
-                self.recuento_de_profundidad += 1
-                if archivo.startswith("http://"):
-                    dame_la_pagina_del_servidor(f"{archivo}", self.recuento_de_profundidad)
-                else:
-                    dame_la_pagina_del_servidor(f"{self.__url}/{archivo}", self.recuento_de_profundidad)
-            return False
+            if not archivo:
+                return False
 
+            aceptados = (".jpg", ".jpeg", ".png", ".gif", ".bmp")
+            path = urlparse(archivo).path.lower()
+            return any(path.endswith(ext) for ext in aceptados)
+
+        def es_link_navegable(archivo):
+            if not archivo:
+                return False
+            archivo = archivo.strip().lower()
+            return not (archivo.startswith("#")
+                or archivo.startswith("mailto:")
+                or archivo.startswith("javascript:"))
+
+        def es_mismo_dominio(url):
+            netloc = urlparse(url).netloc
+            return netloc == self.__fulldomain
+
+        # Ya no uso esta funci'on
         def extraer_attr(un_attr, link):
             '''
             getattr no me funciona sobre NavigableString o algunos Tags?
@@ -159,7 +187,7 @@ class Spider(BeautifulSoup):
                 return (tag.name == un_tag_mio and tag.has_attr(un_attr_mio))
             return tiene_attr
 
-        tags_por_buscar = ["img", "a"]                                                 
+        tags_por_buscar = ["img", "a"]                                             
         attr_por_buscar =  {
             "img": ("src",),
             "a": ("href",),
@@ -169,28 +197,50 @@ class Spider(BeautifulSoup):
             for un_attr in attr_por_buscar[un_tag]:
                 print(f"Probando buscar <{un_tag} attr={un_attr}> ")
                 res = html.find_all(lambdaa(un_tag, un_attr))
-                print(len(res))
+                #print(len(res))
                 for link in res:
                     res = link.get(un_attr)
-                    print(res)
-                    if selecionar_archivo_del_tipo_q_guste(res):
-                        self.array_de_imagenes.append(res)
+                    #print(res)
+                    if not res:
+                        continue
+
+                    url_absoluta = urljoin(base_url, res)
+                    url_absoluta, _ = urldefrag(url_absoluta)
+
+                    if selecionar_archivo_del_tipo_q_guste(url_absoluta):
+                        if url_absoluta not in self._imagenes_vistas:
+                            self.array_de_imagenes.append(url_absoluta)
+                            self._imagenes_vistas.add(url_absoluta)
+                    elif self.__recursividad and un_tag == "a" and es_link_navegable(res) and es_mismo_dominio(url_absoluta):
+                        self.dame_la_pagina_del_servidor(url_absoluta, profundidad + 1)
         print(self.array_de_imagenes)
 
     def descarga_imagenes(self):
-        while self.array_de_imagenes:
-            while self.array_de_imagenes[-1].startswith("../"):
-                self.array_de_imagenes[-1] = self.array_de_imagenes[-1].replace("../", "")
-            print("Descargando imagen: ", f"{self.__url}/{self.array_de_imagenes[-1]}\n")
+        os.makedirs(self.__ruta_de_almacenamiento, exist_ok=True)
 
-            image_response = requests.get(f"{self.__url}/{self.array_de_imagenes[-1]}", stream=True)
-            self.array_de_imagenes[-1] = self.array_de_imagenes[-1].replace("/", "_")
-            self.array_de_imagenes[-1] = self.array_de_imagenes[-1].replace(".", "_")
-            with open(f"{self.__ruta_de_almacenamiento}{self.array_de_imagenes[-1]}", 'wb') as fd:
+        while self.array_de_imagenes:
+            image_url = self.array_de_imagenes.pop(-1)
+            print("Descargando imagen: ", f"{image_url}\n")
+
+            try:
+                image_response = requests.get(image_url, stream=True, timeout=15)
+                image_response.raise_for_status()
+            except requests.RequestException as e:
+                print(f"No se pudo descargar {image_url}: {e}")
+                continue
+
+            content_type = image_response.headers.get("Content-Type", "").lower()
+            if not content_type.startswith("image/"):
+                print(f"Saltando recurso no-imagen: {image_url} ({content_type})")
+                continue
+
+            nombre = os.path.basename(urlparse(image_url).path) or "imagen_sin_nombre"
+            nombre = nombre.replace("/", "_")
+            destino = os.path.join(self.__ruta_de_almacenamiento, nombre)
+
+            with open(destino, 'wb') as fd: #Docs de requests
                 for chunk in image_response.iter_content(chunk_size=4096):
                     fd.write(chunk)
-            self.array_de_imagenes.pop(-1)
-
 
 if __name__ == "__main__":
     r_flag, l_flag, p_flag, url_param = arg_parser()
