@@ -1,0 +1,13 @@
+services:
+  0nionservice:
+    build: .
+    networks:
+      - onion
+    ports:
+      - "4242:4242"
+    volumes:
+      - .:/tor_app
+
+networks:
+  onion:
+    driver: bridge
