@@ -1,0 +1,40 @@
+Purpose
+Section
+Why you care
+Code
+.text
+0x1090–0x127c in your binary.
+The actual machine code. Start here.
+Constants
+.rodata
+Read-only data: string literals, format
+strings. Goldmine for static analysis.
+Imports
+.dynsym / .dynstr
+Exported/imported function names.
+Tells you what libc calls are in use.
+PLT / GOT
+.plt / .got.plt
+Dynamic linking trampoline + address
+table. Key for hooking and exploits.
+Symbols
+.symtab / .strtab
+Full symbol table — only present if
+NOT stripped. Lucky: yours has it.
+R/W data
+.data / .bss
+.data = initialized globals. .bss = zero-
+initialized globals. Targets for patches.
+
+The three program headers worth understanding
+Section headers describe file layout. Program headers describe runtime memory layout — what the loader actually does. For reversing, focus on these:
+LOAD segments — these four entries define what memory pages exist at runtime and their permissions (R, R E, RW). The R E segment (offset 0x001000, flags R E) is your executable code. The RW segment is writable data. This is important because if you see code in a RW segment, that's a red flag — possible self-modifying code or a packer.
+GNU_STACK: RW (no X flag) — the stack is not executable. This means classic shellcode-on-stack exploits won't work directly — NX/DEP is enabled. Relevant if this is a CTF challenge.
+GNU_RELRO — covers .init_array, .fini_array, .dynamic, .got — these sections are remapped read-only after dynamic linking completes. The .got.plt is not in RELRO, which means GOT overwrite attacks are still possible on this binary.
+
+
+objdump -t ./level1              # dump symbol table — find function names + their offsets
+objdump -d -M intel ./level1     # full disassembly of executable sections
+objdump -s -j .rodata ./level1   # read all string/constant data
+objdump -R ./level1              # see which libc calls are being made via GOT
+
