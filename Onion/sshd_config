@@ -17,7 +17,7 @@ AddressFamily any
 
 #HostKey /etc/ssh/ssh_host_rsa_key
 #HostKey /etc/ssh/ssh_host_ecdsa_key
-#HostKey /etc/ssh/ssh_host_ed25519_key
+HostKey /etc/ssh/ssh_host_ed25519_llave
 
 # Ciphers and keying
 #RekeyLimit default none
@@ -30,14 +30,14 @@ AddressFamily any
 
 LoginGraceTime 30m
 PermitRootLogin no
-#StrictModes yes
+StrictModes yes
 MaxAuthTries 3
 MaxSessions 3
 
 PubkeyAuthentication yes
 
 # Expect .ssh/authorized_keys2 to be disregarded by default in future.
-AuthorizedKeysFile     .ssh/authorized_keys .ssh/authorized_keys2
+AuthorizedKeysFile     .ssh/authorized_keys
 
 #AuthorizedPrincipalsFile none
 
