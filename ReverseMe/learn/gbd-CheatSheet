@@ -1,0 +1,131 @@
+start
+watch gid & watch uid
+info frame
+ptype gid - uint 
+x/10i $pc -> shows next 10 instructions
+disas (disassemble)
+
+
+(gdb) bt              # backtrace
+(gdb) bt full         # with locals/args
+(gdb) frame 0         # select a frame
+(gdb) info frame      # frame details (sp, saved regs, etc.)
+
+Inspect variables (locals, args, globals)
+
+See locals & args in current frame:
+
+(gdb) info locals
+(gdb) info args
+
+
+Print / pretty print / type:
+
+(gdb) p var
+(gdb) p/x var         # hex
+(gdb) p/d var         # signed decimal
+(gdb) p/u var         # unsigned
+(gdb) p/t var         # binary
+(gdb) ptype var       # type info
+
+
+Pointers & memory:
+
+(gdb) p &var
+(gdb) x/16xb &var     # examine 16 bytes at &var
+(gdb) x/10i $pc       # show next 10 instructions
+
+Change variables (force behavior)
+
+Direct assignment (same type):
+
+(gdb) set var counter = 42
+(gdb) set var buf[0] = 'A'
+
+
+Type-casted write (structs/packed memory):
+
+(gdb) set {int}0x7fffffffe2c0 = 1337
+(gdb) set {char[5]}buf = "PWN\0"
+
+
+Force function to return a value from current frame:
+
+(gdb) return 0         # sets return value and unwinds
+(gdb) finish           # run until current function returns (shows retval)
+
+
+Call a function to mutate state:
+
+(gdb) call reset_state()
+
+Make the next step do what you want
+
+Source-level stepping:
+
+(gdb) next        # step over (don’t enter calls)
+(gdb) step        # step into
+(gdb) finish      # run to end of current function
+(gdb) until 123   # run until reaching source line 123
+(gdb) advance func_name  # run until next time PC reaches func entry
+
+
+Instruction-level precision:
+
+(gdb) layout asm              # TUI asm view (optional)
+(gdb) set disassemble-next-line on
+(gdb) disassemble /r $pc,$pc+32   # see bytes & next instructions
+(gdb) stepi                    # single instruction
+(gdb) nexti                    # next instruction, skip over calls
+
+
+Rewrite the future:
+
+(gdb) set $pc = 0x401234   # jump execution to any address (careful)
+(gdb) jump *0x401234       # same idea; stops before executing there
+
+Watchpoints (follow variable changes live)
+
+Data watch:
+
+(gdb) watch var         # stop when var is written
+(gdb) rwatch var        # stop when var is read
+(gdb) awatch var        # stop on read or write
+
+
+Raw address watch (struct field, pointer target):
+
+(gdb) watch -location *ptr
+(gdb) watch -location ((struct S*)0x...)->field
+
+Reverse for “what just changed this?” 
+
+Lightweight recording:
+
+(gdb) record
+(gdb) reverse-stepi
+(gdb) reverse-next
+(gdb) reverse-continue
+
+
+(Use record stop to end. Recording costs performance/memory but is gold for backtracking writes.)
+
+Multithreading (don’t get fooled)
+
+Focus and lock scheduling:
+
+(gdb) info threads
+(gdb) thread 3
+(gdb) set scheduler-locking on   # only current thread runs when stepping
+
+
+Break on thread creation:
+
+(gdb) set stop-on-solib-events 1
+(gdb) set stop-on-thread-events 1
+
+Fork/exec boundaries (keep control across execve)
+(gdb) set follow-fork-mode child
+(gdb) set detach-on-fork off
+(gdb) catch exec        # stop when exec occurs
+(gdb) catch syscall execve

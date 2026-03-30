@@ -373,7 +373,7 @@ Igual que el ejercicio anterior pero se complicara la cosa seguramente.
 
     >>> start
     >>> x/500i $pc (veamos todas las instrucciones de ejecucion desde el punto de entrada)
-    0x565562d4 <main+4>: sub    $0x54,%esp
+   0x565562d4 <main+4>: sub    $0x54,%esp            ---------   reserva 84 bytes de stack (0x54 = 84)
    0x565562d7 <main+7>: call   0x565562dc <main+12>
    0x565562dc <main+12>:        pop    %ebx
    0x565562dd <main+13>:        add    $0x5d24,%ebx
@@ -394,62 +394,62 @@ Igual que el ejercicio anterior pero se complicara la cosa seguramente.
    0x5655631e <main+78>:        je     0x5655632c <main+92>
    0x56556324 <main+84>:        mov    -0x40(%ebp),%ebx
    0x56556327 <main+87>:        call   0x56556220 <no>   !!!!
-   0x5655632c <main+92>:        movsbl -0x34(%ebp),%ecx
-   0x56556330 <main+96>:        mov    $0x30,%eax
-   0x56556335 <main+101>:       cmp    %ecx,%eax
+   0x5655632c <main+92>:        movsbl -0x34(%ebp),%ecx   ----------------
+   0x56556330 <main+96>:        mov    $0x30,%eax         ------ '0'
+   0x56556335 <main+101>:       cmp    %ecx,%eax          flag[X] == '0' ?
    0x56556337 <main+103>:       je     0x56556345 <main+117>
    0x5655633d <main+109>:       mov    -0x40(%ebp),%ebx
    0x56556340 <main+112>:       call   0x56556220 <no>    !!!!
-   0x56556345 <main+117>:       movsbl -0x35(%ebp),%ecx
-   0x56556349 <main+121>:       mov    $0x30,%eax
-   0x5655634e <main+126>:       cmp    %ecx,%eax
+   0x56556345 <main+117>:       movsbl -0x35(%ebp),%ecx  ----------------
+   0x56556349 <main+121>:       mov    $0x30,%eax        -------- '0'
+   0x5655634e <main+126>:       cmp    %ecx,%eax         flag[X] == '0' ?
    0x56556350 <main+128>:       je     0x5655635e <main+142>
    0x56556356 <main+134>:       mov    -0x40(%ebp),%ebx
    0x56556359 <main+137>:       call   0x56556220 <no>    !!!!
-   0x5655635e <main+142>:       mov    -0x40(%ebp),%ebx
-   0x56556361 <main+145>:       mov    -0xc(%ebx),%eax
-   0x56556367 <main+151>:       mov    (%eax),%eax
-   0x56556369 <main+153>:       mov    -0xc(%ebx),%ecx
-   0x5655636f <main+159>:       mov    %eax,(%esp)
-   0x56556372 <main+162>:       call   0x56556070 <fflush@plt>
-   0x56556377 <main+167>:       mov    -0x40(%ebp),%ebx
-   0x5655637a <main+170>:       lea    -0x1d(%ebp),%eax
-   0x5655637d <main+173>:       xor    %ecx,%ecx
-   0x5655637f <main+175>:       mov    %eax,(%esp)
-   0x56556382 <main+178>:       movl   $0x0,0x4(%esp)
-   0x5655638a <main+186>:       movl   $0x9,0x8(%esp)
-   0x56556392 <main+194>:       call   0x565560b0 <memset@plt>
-   0x56556397 <main+199>:       movb   $0x64,-0x1d(%ebp)
-   0x5655639b <main+203>:       movb   $0x0,-0x36(%ebp)
-   0x5655639f <main+207>:       movl   $0x2,-0x14(%ebp)
-   0x565563a6 <main+214>:       movl   $0x1,-0x10(%ebp)
-   0x565563ad <main+221>:       mov    -0x40(%ebp),%ebx
-   0x565563b0 <main+224>:       lea    -0x1d(%ebp),%ecx
-   0x565563b3 <main+227>:       mov    %esp,%eax
-   0x565563b5 <main+229>:       mov    %ecx,(%eax)
-   0x565563b7 <main+231>:       call   0x565560a0 <strlen@plt>
-   0x565563bc <main+236>:       mov    %eax,%ecx
-   0x565563be <main+238>:       xor    %eax,%eax
-   0x565563c0 <main+240>:       cmp    $0x8,%ecx
-   0x565563c3 <main+243>:       mov    %al,-0x41(%ebp)
-   0x565563c6 <main+246>:       jae    0x565563ee <main+286>
-   0x565563cc <main+252>:       mov    -0x40(%ebp),%ebx
-   0x565563cf <main+255>:       mov    -0x14(%ebp),%eax
-   0x565563d2 <main+258>:       mov    %eax,-0x48(%ebp)
-   0x565563d5 <main+261>:       lea    -0x35(%ebp),%ecx
-   0x565563d8 <main+264>:       mov    %esp,%eax
-   0x565563da <main+266>:       mov    %ecx,(%eax)
-   0x565563dc <main+268>:       call   0x565560a0 <strlen@plt>
-   0x565563e1 <main+273>:       mov    %eax,%ecx
-   0x565563e3 <main+275>:       mov    -0x48(%ebp),%eax
-   0x565563e6 <main+278>:       cmp    %ecx,%eax
-   0x565563e8 <main+280>:       setb   %al
-   0x565563eb <main+283>:       mov    %al,-0x41(%ebp)
-   0x565563ee <main+286>:       mov    -0x41(%ebp),%al
-   0x565563f1 <main+289>:       test   $0x1,%al
-   0x565563f3 <main+291>:       jne    0x565563fe <main+302>
-   0x565563f9 <main+297>:       jmp    0x5655644a <main+378>
-   0x565563fe <main+302>:       mov    -0x40(%ebp),%ebx
+   0x5655635e <main+142>:       mov    -0x40(%ebp),%ebx   ----- ebx = valor guardado en ebp-64
+   0x56556361 <main+145>:       mov    -0xc(%ebx),%eax    ----- eax = *(ebx - 12)  — desreferencia un puntero
+   0x56556367 <main+151>:       mov    (%eax),%eax        ----- eax = *eax          — doble desreferencia
+   0x56556369 <main+153>:       mov    -0xc(%ebx),%ecx    ----- ecx = *(ebx - 12)   — misma dirección que antes
+   0x5655636f <main+159>:       mov    %eax,(%esp)        ----- primer argumento para la siguiente call = **(ebx-12)
+   0x56556372 <main+162>:       call   0x56556070 <fflush@plt>  ----- flush de algo que no parece la entrada ya que parece una struct o algo complejo.
+   0x56556377 <main+167>:       mov    -0x40(%ebp),%ebx   ----- ebx = mueve el valor guardado en ebp-64 (otra vez)
+   0x5655637a <main+170>:       lea    -0x1d(%ebp),%eax   ----- eax = Carga el valor guardado en ebp-29 (puntero?)
+   0x5655637d <main+173>:       xor    %ecx,%ecx          ----- XOR sobre el mismo puntero ?
+   0x5655637f <main+175>:       mov    %eax,(%esp)        ----- desreferencia $esp (argumentos) y le carga el valor de $eax 
+   0x56556382 <main+178>:       movl   $0x0,0x4(%esp)     ----  pone el valor 0 (al segundo argumento) en el registro $esp + 4
+   0x5655638a <main+186>:       movl   $0x9,0x8(%esp)     ----- pone el valor 9 (al tercer arg) en el registro $esp + 8 
+   0x56556392 <main+194>:       call   0x565560b0 <memset@plt>  ---- llama a memset con esos argumentos memset($eax, 0, 9)
+   0x56556397 <main+199>:       movb   $0x64,-0x1d(%ebp)  ----- $ebp - 29 = 100 ? ----> ASCII letra 'd' en buffer de memset (indice 29) 
+   0x5655639b <main+203>:       movb   $0x0,-0x36(%ebp)   ----- $ebp - 54 = 0 --- NULL terminator del buffer de scanf ?
+   0x5655639f <main+207>:       movl   $0x2,-0x14(%ebp)   ----- $ebp - 20 = 2     variables nueva ?? o pone caracteres especiales en el buffer de memset
+   0x565563a6 <main+214>:       movl   $0x1,-0x10(%ebp)   ----- $ebp - 16 = 1     dos variables nuevas ??
+   0x565563ad <main+221>:       mov    -0x40(%ebp),%ebx   ----- $ebx = valor guardado en $ebp-64
+   0x565563b0 <main+224>:       lea    -0x1d(%ebp),%ecx   ----- $ecx = puntero en $ebp-29 (buffer memset)
+   0x565563b3 <main+227>:       mov    %esp,%eax          -----
+   0x565563b5 <main+229>:       mov    %ecx,(%eax)        ----- argumento de strlen es $eax donde la desreferencia de $eax apunta a $ebp-29 ? (buffer de memset !!!!!!)
+   0x565563b7 <main+231>:       call   0x565560a0 <strlen@plt> ---- saca el len del buffer de memset --> buffer de 9 espacios de memoria pero solo un caracter dentro. len=1?
+   0x565563bc <main+236>:       mov    %eax,%ecx               ---- $ecx = resulado len()
+   0x565563be <main+238>:       xor    %eax,%eax               ---- limpia $eax ya que operacion en la misma direccion y X-or
+   0x565563c0 <main+240>:       cmp    $0x8,%ecx               ----- compara resultado con valor 8 >=!
+   0x565563c3 <main+243>:       mov    %al,-0x41(%ebp)         ----- ? guarda algo en $ebp-65 (nueva variable)
+   0x565563c6 <main+246>:       jae    0x565563ee <main+286>   ---- Jump if above or equal
+   0x565563cc <main+252>:       mov    -0x40(%ebp),%ebx        ---- $ebx = $ebp-64 (valor de una variable)
+   0x565563cf <main+255>:       mov    -0x14(%ebp),%eax        ---- $eax = $ebp-20 = 2 (variable que guardamos antes en main 207 )
+   0x565563d2 <main+258>:       mov    %eax,-0x48(%ebp)        ---- Pone el valor de $eax = 2 en $ebp-72? nueva variable ?
+   0x565563d5 <main+261>:       lea    -0x35(%ebp),%ecx        ---- $ecx = carga puntero de buffer de scanf.
+   0x565563d8 <main+264>:       mov    %esp,%eax               --- inicializa argumentos
+   0x565563da <main+266>:       mov    %ecx,(%eax)             --- ...
+   0x565563dc <main+268>:       call   0x565560a0 <strlen@plt>  ----argumento de strlen es $eax donde la desreferencia de $eax apunta a -0x35(%ebp) ? (buffer que usa scanf !!!!!!)
+   0x565563e1 <main+273>:       mov    %eax,%ecx               --- guarda resultado de strlen(lea) en $ecx
+   0x565563e3 <main+275>:       mov    -0x48(%ebp),%eax        --- $eax = $ebp-72 => 2 ?
+   0x565563e6 <main+278>:       cmp    %ecx,%eax               --- strlen >=2 o strlen - 2 ?
+   0x565563e8 <main+280>:       setb   %al                     --- set if Below pone al = 1 si eax inferior o superior que strlen?
+   0x565563eb <main+283>:       mov    %al,-0x41(%ebp)         ----mueve el boolean a $ebp-65 (nueva variable ?) quiero entender que checkea que strlen() > 2
+   0x565563ee <main+286>:       mov    -0x41(%ebp),%al         --- Vuelve a dejar el valor booleano en $al
+   0x565563f1 <main+289>:       test   $0x1,%al                --- compara con AND si $al es positivo (existe) comprueba el bit menos significativo
+   0x565563f3 <main+291>:       jne    0x565563fe <main+302>   --- si no es equal 0 (booleano es true) va a instruccion 302 
+   0x565563f9 <main+297>:       jmp    0x5655644a <main+378>   ---- si es equal (booleano es false) va a instruccin 378 (en donde llama a ok)
+   0x565563fe <main+302>:       mov    -0x40(%ebp),%ebx        ---- 
    0x56556401 <main+305>:       mov    -0x14(%ebp),%eax
    0x56556404 <main+308>:       mov    -0x35(%ebp,%eax,1),%al
    0x56556408 <main+312>:       mov    %al,-0x39(%ebp)
@@ -630,21 +630,76 @@ Igual que el ejercicio anterior pero se complicara la cosa seguramente.
 
 
 Concluyo:
-    - 1. primero llama a scanf con texto pasando un buffer rellenado por printf
+    - 1. Imprime algo y llama a scanf con un buffer dinamico (no hay overflow)
     - 2. scanf retorna un valor que es cargado en -0xc(%ebp) (va a buscar el indice 12 del registro ebp)
     - 3. y hay una instruccion 'cmp' que compara 0x1 con la variable $eax (nuestro retorno guardado en -0xc(%ebp)) entiendo que comprueba que haya algo.
     - 4. En Caso que si exista la entrada se salta las dos siguientes instrucciones, la llamada a la funcion 'no'
-    - 5. Y llega a la instruccion 0x5655632c <main+92>: en la que se vuelve a comparar un byte convertido a long (movsbl) el valor pero cargando el indice 52 de memoria de nuestra entrada y comparandolo con el hexadecimal 30 -> 48 decimal
-    - 6. Si la comparacion es valida salta la instrucion    0x56556345 <main+117>:  movsbl -0x35(%ebp),%ecx     donde vuelve a mover un byte del indice 53 de memoria de nuestra entrada y compara con el hexadecimal 30 -> 48 decimal 
-    - 7. Si la comparacion es valida salta la instruccion   0x5655635e <main+142>:       mov    -0x40(%ebp),%ebx
+    - 5. Y llega a la instruccion 0x5655632c <main+92>: en la que se vuelve a comparar un byte convertido a long (movsbl) el valor pero cargando el indice 52 de memoria de nuestra entrada y comparandolo con el hexadecimal 30 -> 48 decimal -> '0'
+    - 6. Si la comparacion es valida salta la instrucion    0x56556345 <main+117>:  movsbl -0x35(%ebp),%ecx     donde vuelve a mover un byte del indice 53 de memoria de nuestra entrada y compara con el hexadecimal 30 -> 48 decimal -> '0'
+    - 7. Si la comparacion es valida salta la instrucciones   0x5655635e <main+142>:       mov    -0x40(%ebp),%ebx 
                                                             0x56556361 <main+145>:       mov    -0xc(%ebx),%eax
                                                             0x56556367 <main+151>:       mov    (%eax),%eax
                                                             0x56556369 <main+153>:       mov    -0xc(%ebx),%ecx
                                                             0x5655636f <main+159>:       mov    %eax,(%esp)
                                                             0x56556372 <main+162>:       call   0x56556070 <fflush@plt>
-    - 8. Aqui la logica es diferente ya no se hace comparacion ni se saca un byte de la entrada sino que se mueve el indice 60 del registro de nuestra entrada al registro $ebx. ...etcc...Al cual liberan la memoria me parece del primer byte.
+    - 8. Aqui la logica es diferente ya no se hace comparacion ni se saca un byte de la entrada sino que se mueve el indice 60 del registro de nuestra entrada al registro $ebx. ...etcc....  ver arriba en las instrucciones.
 
+    - 8.1. No hay buffer overflow de scanf
 
-    - 9. 
+    - 8.2   Mapa de memoria del registro EBP:
 
+            ebp-0x08  =  ebp-8   -> variable inicializada a 0  (main+22)
+            ebp-0x0c  =  ebp-12  -> guarda retorno de scanf    
+            ebp-0x1d  =  ebp-29  -> argumento 1 de memset (LEA) 
+            ebp-0x35  =  ebp-53  -> input[0]  — comparado con '0'
+            ebp-0x34  =  ebp-52  -> input[1]  — comparado con '0'
+            ebp-0x40  =  ebp-64  -> puntero base (GOT)
+
+    - 9. ¿Memset actúa sobre el mismo buffer?
+            ```
+            scanf  escribe desde  ebp-53  hacia adelante
+            memset actúa  desde  ebp-29  (0x1d) hacia adelante, 9 bytes
+            ```
+            Visualmente en el stack:
+            ```
+            ebp-53  [input[0]  ---- scanf empieza aquí]
+            ebp-52  [input[1]]
+            ebp-51  [input[2]]
+            ebp-50  [input[3]]
+            ebp-49  [input[4]]
+            ebp-48  [input[5]]
+            ebp-47  [input[6]]
+            ebp-46  [input[7]]
+            ...
+            ebp-29           ---- memset empieza aquí, 9 bytes
+            ebp-28  
+            ebp-27  
+            ...
+            ebp-21
+
+    - 10. de memset a strlen: main+194 a main+246
+        memset(buffer, 0, 9)     -> limpia 9 bytes
+        buffer[0] = 'd'          -> escribe primer carácter
+        ebp-54    = 0            -> null terminator antes del input
+        ebp-20    = 2            -> índice o contador inicializado
+        ebp-16    = 1            -> índice o contador inicializado
+        strlen(buffer) >= 8 ?    -> espera un string al menos 8 chars en buffer
     
+    - 11. Mas adelante comprueba la longitud de la entrada sea superior a 2 usando el mismo booleano en $al.
+            El flag se en dos condiciones:
+                - strlen(buffer) >= 8 --> jae en main+246
+                - strlen(input) >= 2 --> setb en main+280
+    - 12. Cómo se construye el resto del buffer — ahora solo tiene 'd' en buffer[0], necesita 8 chars para pasar la validación
+          Qué hace con counter1 = 2 y counter2 = 1 — casi seguro son índices de un bucle que construye o recorre algo
+
+    - me doy cuenta que parece un bucle while y que el testeo antes de volver a entrar en en la logica compara bits positivos y negativos
+
+    - me doy cuenta que hay una parte  del codigo que simplemente compara alomejor alli puede estar comparando con la llave entera.
+
+    - Hablando con los companeros deducimos que hay un bucle que compara caracteres y usa un buffer de longitud 3.
+        Como al principio se pone a mano el numero 100 -> caracter 'd' deducimos que la entrada de 23 caracteres (por strings y delabare*3) y 23/3 = 7
+        delabere tiene 7 caracteres entonces que pasa si la comparacion se hace en enteros, que tienes una string de entrada 100101108097098101114101
+        pero tiene hardcodeado la comparacion al primer caracter y solo compara los dos primeros indices con 0:
+        resultando en 00101108097098101114101
+
+        Gracias por la resolutiva charla con juan-gon

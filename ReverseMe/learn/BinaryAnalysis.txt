@@ -1,0 +1,55 @@
+File analysis:
+    # File type and basic info
+    file binary_name
+    # - No options: Shows file type, architecture, etc.
+
+    # Security properties
+    checksec --file=binary_name
+    # --file: Specify target file
+    # Shows RELRO, Stack Canary, NX, PIE, etc.
+
+Disassembly:
+    # Disassemble specific function
+    objdump -d binary_name 
+    # -d: Disassemble executable sections
+
+    # Disassemble with Intel syntax
+    objdump -d -M intel binary_name
+    # -M intel: Use Intel syntax instead of AT&T   
+
+Section Analysis:
+    # List all sections
+    readelf -S binary_name
+    # -S: Show section headers
+
+    # Display specific section contents
+    objdump -s -j .section_name binary_name
+    # -s: Show full section contents
+    # -j .section_name: Only show specified section
+
+    # Show relocation entries
+    readelf -r binary_name
+    # -r: Show relocation entries (GOT, PLT info)
+
+Symbol Analysis:
+    # Show symbols
+    nm binary_name
+    # - No options: Show symbol table
+
+    # Show dynamic symbols
+    readelf -s binary_name
+    # -s: Show symbol table
+
+    # Show only function symbols
+    objdump -t binary_name | grep "F .text"
+    # -t: Show symbol table
+    # grep "F .text": Only show functions in .text section
+
+Memory layout analysis:
+    # Show program headers
+    readelf -l binary_name
+    # -l: Show program headers (memory layout)
+
+    # Show dynamic section
+    readelf -d binary_name
+    # -d: Show dynamic section (shared library dependencies)
