@@ -1,0 +1,7 @@
+services:
+  stockholm:
+    build: .
+    container_name: stockholm
+    stdin_open: true
+    tty: true
+  
