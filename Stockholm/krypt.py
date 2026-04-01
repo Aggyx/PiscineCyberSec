@@ -66,23 +66,22 @@ class krypt():
                 'password': self.password_rsa,
                 'timestamp': str(__import__('datetime').datetime.now())
             }
-            
+
             # Serializizar a JSON
             json_data = json.dumps(session_data).encode('utf-8')
-            
+
             # Generar semilla and derivar llave desde contraseña de sesión
             salt = get_random_bytes(16)
             key = PBKDF2(session_password, salt, dkLen=32, count=100000, hmac_hash_module=sha256)
-            
+
             # Encriptar con AES-256-GCM
             nonce = get_random_bytes(12)
-            cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
+            cipher = AES.new(key, AES.MODE_GCM, nonce)
             ciphertext, tag = cipher.encrypt_and_digest(json_data)
-            
             return {
                 'version': '1.0',
                 'salt': base64.b64encode(salt).decode('utf-8'),
-                'iv': base64.b64encode(nonce).decode('utf-8'),
+                'iv': base64.b64encode(cipher.nonce).decode('utf-8'),
                 'ciphertext': base64.b64encode(ciphertext).decode('utf-8'),
                 'tag': base64.b64encode(tag).decode('utf-8')
             }
@@ -216,7 +215,7 @@ class krypt():
         print(str(pub))
         print("\n=================================================================\n")
     
-    def encrypt_data_RSA_OVER_AES(self, path: str, filename: str):
+    def encrypt_data_RSA_OVER_AES(self, path: str, filename: str, isprint:bool=False):
         '''
         https://pycryptodome.readthedocs.io/en/latest/src/examples.html#encrypt-data-with-rsa
 
@@ -229,6 +228,7 @@ class krypt():
         try:
             with open(path+filename, "rb") as f:
                 data = f.read()
+            os.remove(path + filename)
         except FileNotFoundError:
             print(f"File not found: {path+filename}")
             return False
@@ -236,6 +236,8 @@ class krypt():
             print("4Error: " + str(E))
             return False
         # Encriptar session_key con la llave publica RSA
+        if isprint:
+            print("Encriptando con RSA: ", self.__rsapubkey_path)
         cliente_key = RSA.import_key(open(self.__rsapubkey_path).read())
         cipher_rsa = PKCS1_OAEP.new(cliente_key)
 
@@ -245,7 +247,11 @@ class krypt():
         # Encriptar los datos con el cifrado AES y session_key
         cipher_aes = AES.new(session_key, AES.MODE_GCM)
         ciphertext, tag = cipher_aes.encrypt_and_digest(data)
+        if isprint:
+            print("Borrando archivo ", path + filename)
         try:
+            if isprint:
+                print("Encriptado: ", path + filename + self.ext)
             with open(f"{path}{filename}{self.ext}", "wb") as f:
                 f.write(enc_session_key) # !!!!!!!!!!!!
                 f.write(cipher_aes.nonce) # !!!!!!!!!!!
@@ -255,27 +261,34 @@ class krypt():
             print("4Error: " + str(E))
             return False
         return True
-        
 
-    def decrypt_data_RSA_OVER_AES(self, path:str, filename:str, rsaprivkey_path=None):
+    def decrypt_data_RSA_OVER_AES(self, path:str, filename:str, rsaprivkey_path=None, password=None, isprint:bool=False):
         '''
         Ver enlace en encrypt_data_RSA_OVER_AES
         Usa la llave privada RSA para descifrar la session_key, y luego usa esa session_key para descifrar los datos con AES.
         '''
         if rsaprivkey_path is not None:
             self.__rsaprivkey_path = rsaprivkey_path
+        if password is not None:
+            self.password_rsa = password
+        if isprint:
+            print("Importando RSA en path: ", self.__rsaprivkey_path)
+            print("Usando contraseña de RSA: ", self.password_rsa)
         private_key = RSA.import_key(open(self.__rsaprivkey_path).read(), passphrase=self.password_rsa)
         path = path if path.endswith("/") else path + "/"
         try:
+            if isprint:
+                print("Desencriptando: ", path + filename)
             with open(path + filename, "rb") as f:
                 enc_session_key = f.read(private_key.size_in_bytes())
                 nonce = f.read(16)
                 tag = f.read(16)
                 ciphertext = f.read()
+            os.remove(path + filename)
         except FileNotFoundError:
             print(f"File not found: {path+filename}")
             return False
-        except Exception as E:
+        except Exception as E:  
             print("4Error: " + str(E))
             return False
 
@@ -287,12 +300,13 @@ class krypt():
         cipher_aes = AES.new(session_key, AES.MODE_GCM, nonce)
         data = cipher_aes.decrypt_and_verify(ciphertext, tag)
         try:
+            if isprint:
+                print("Restaurado: ", path + filename[:-3])
             with open(path + filename[:-3], "wb") as f:
                 f.write(data)
         except Exception as E:
             print("4Error: " + str(E))
             return False
-        print(data.decode("utf-8"))
         return True
 
 instancia = None
